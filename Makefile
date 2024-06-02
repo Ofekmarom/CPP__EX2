@@ -1,13 +1,21 @@
 #ID : 208336701
 #mail : ofekmarom9@gmail.com
 
+#matala 2
 
-CXX=clang++
-CXXFLAGS=-std=c++11 -Werror -g -Wsign-conversion
+CXX = clang++
+CXXFLAGS = -std=c++11 -Werror -g -Wsign-conversion
 VALGRIND_FLAGS=-v --leak-check=full --show-leak-kinds=all  --error-exitcode=99
 
-SOURCES=Graph.cpp Algorithms.cpp TestCounter.cpp Test.cpp
-OBJECTS=$(subst .cpp,.o,$(SOURCES))
+# Source files
+SRC_DEMO = Demo.cpp Graph.cpp Algorithms.cpp
+SRC_TEST = Test.cpp Graph.cpp Algorithms.cpp
+
+# Object files
+OBJ_DEMO = $(SRC_DEMO:.cpp=.o)
+OBJ_TEST = $(SRC_TEST:.cpp=.o)
+
+# Targets
 all: demo test
 
 run: demo
@@ -15,11 +23,11 @@ run: demo
 runtest: test
 	./$^
 
-demo: Demo.o $(OBJECTS)
-	$(CXX) $(CXXFLAGS) Demo.o Graph.o Algorithms.o -o demo
+demo: $(OBJ_DEMO)
+	$(CXX) $(CXXFLAGS) $(OBJ_DEMO) -o demo
 
-test: TestCounter.o Test.o $(OBJECTS)
-	$(CXX) $(CXXFLAGS) TestCounter.o Test.o Graph.o Algorithms.o -o test
+test: $(OBJ_TEST)
+	$(CXX) $(CXXFLAGS) $(OBJ_TEST) -o test
 
 tidy:
 	clang-tidy $(SOURCES) -checks=bugprone-*,clang-analyzer-*,cppcoreguidelines-*,performance-*,portability-*,readability-*,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-owning-memory --warnings-as-errors=-* --
@@ -29,7 +37,7 @@ valgrind: demo test
 	valgrind --tool=memcheck $(VALGRIND_FLAGS) ./test 2>&1 | { egrep "lost| at " || true; }
 
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) --compile $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f *.o demo test bedika
+	rm -f *.o demo test
